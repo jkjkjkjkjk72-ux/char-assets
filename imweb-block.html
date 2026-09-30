@@ -63,9 +63,9 @@
       </svg>
       <h2 class="qc-head">평범함을 거부하는<br>브랜드와 기업을 위한<br>영상 파트너</h2>
       <div class="qc-services">
-        <a class="qc-svc" href="#"><h3>브랜드 필름</h3><div class="qc-r"><b>01</b>한 줄로 브랜드를 각인시키는 영상. 기획부터 촬영, 후반까지 한 팀이 끝까지 맡습니다.</div></a>
-        <a class="qc-svc" href="#"><h3>모션 그래픽<br>&amp; 3D</h3><div class="qc-r"><b>02</b>설명이 필요 없는 움직임. 모션·3D·타이포로 제품과 메시지를 한눈에 보이게 합니다.</div></a>
-        <a class="qc-svc" href="#"><h3>크리에이티브<br>파트너십</h3><div class="qc-r"><b>03</b>캠페인, 광고, 행사 영상까지. 필요한 순간마다 붙어서 같이 만드는 장기 파트너.</div></a>
+        <a class="qc-svc" href="#"><h3>브랜드 필름</h3></a>
+        <a class="qc-svc" href="#"><h3>모션 그래픽<br>&amp; 3D</h3></a>
+        <a class="qc-svc" href="#"><h3>크리에이티브<br>파트너십</h3></a>
       </div>
     </div>
   </div>
@@ -187,8 +187,9 @@
 /* ── 녹색 위 내용: 스크롤 초반 260px 동안 162px 더 올라간다(실측) ── */
 /* 헤드라인이 첫 초록 화면 아래쪽(68%)에 보이도록 고정 화면 위로 당겨 올린다 */
 .qc-content { position: relative; z-index: 5; padding: 0 40px 0; margin-top: calc(var(--qc-h) * -.32); margin-bottom: -162px; color: #000; will-change: transform; }
-.qc-head { opacity: 0; transform: translateY(70px); transition: opacity .25s ease, transform .3s ease; }
-.qc-wiped .qc-head { opacity: 1; transform: none; transition: opacity .6s ease 1.05s, transform 1s cubic-bezier(.16,1,.3,1) 1.05s; }
+.qc-head, .qc-services { opacity: 0; transform: translateY(70px); transition: opacity .25s ease, transform .3s ease; }
+.qc-filled .qc-head { opacity: 1; transform: none; transition: opacity .6s ease .05s, transform 1s cubic-bezier(.16,1,.3,1) .05s; }
+.qc-filled .qc-services { opacity: 1; transform: none; transition: opacity .6s ease .25s, transform 1s cubic-bezier(.16,1,.3,1) .25s; }
 .qc-graf2 { position: absolute; left: 0; top: 86px; width: 100%; height: auto; z-index: -1; pointer-events: none; }
 .qc-graf2 { opacity: 0; transition: opacity .4s ease; }
 .qc-wiped .qc-graf2 { opacity: 1; transition-delay: .6s; }
@@ -199,8 +200,6 @@
 .qc-svc { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; padding-bottom: 50px; margin-bottom: 50px; border-bottom: 1px solid #000; }
 .qc-svc:last-child { margin-bottom: 0; }
 .qc-svc h3 { max-width: 40vw; text-transform: uppercase; font-size: 4.5vw; font-weight: 800; line-height: 1.02; letter-spacing: -.035em; }
-.qc-r { text-align: right; max-width: 460px; font-size: 15px; line-height: 1.4; }
-.qc-r b { display: block; margin-bottom: 26px; }
 
 /* ── 아치: 지름 100vw 녹색 원의 아래 반쪽 + 바깥 둘레 텍스트 ── */
 .qc-arch { position: relative; z-index: 3; height: calc(50vw + 34vh); overflow: hidden; background: #000; }
@@ -213,8 +212,6 @@
   .qc-root .qc-content h2.qc-head { font-size: 9vw !important; }
   .qc-svc { flex-direction: column; gap: 14px; padding-bottom: 30px; margin-bottom: 30px; }
   .qc-svc h3 { font-size: 9vw; max-width: none; }
-  .qc-r { text-align: left; }
-  .qc-r b { margin-bottom: 10px; }
   .qc-services { margin-top: 120px; }
   .qc-bar1, .qc-bar2 { left: 8px; right: 8px; }
   .qc-reel { display: none; }
@@ -225,7 +222,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .qc-cspin { animation: none; }
-  .qc-mrise, .qc-head { transition: none !important; }
+  .qc-mrise, .qc-head, .qc-services { transition: none !important; }
   .qc-orbit-spin, .qc-track { animation: none; }
   .qc-float { transition: none !important; }
   .qc-m3d { animation: none; transform: rotateY(-18deg); }
@@ -239,13 +236,13 @@
   // 캐릭터 주소는 커밋 해시로 고정한다. @main 은 jsDelivr 캐시가 최대 하루 늦어 옛 렌더가 섞였다(실측).
   // 캐릭터를 다시 렌더해 push 하면 아래 해시 3곳을 새 커밋 해시로 바꾼다.
   var CFG = {
-    pcBase: 'https://cdn.jsdelivr.net/gh/jkjkjkjkjk72-ux/char-assets@1a02ea357dc9e4007b004a53214c58a578a8c96d/char/pc/',
-    mbBase: 'https://cdn.jsdelivr.net/gh/jkjkjkjkjk72-ux/char-assets@1a02ea357dc9e4007b004a53214c58a578a8c96d/char/mobile/',
-    still:  'https://cdn.jsdelivr.net/gh/jkjkjkjkjk72-ux/char-assets@1a02ea357dc9e4007b004a53214c58a578a8c96d/char/still.webp',
+    pcBase: 'https://cdn.jsdelivr.net/gh/jkjkjkjkjk72-ux/char-assets@235e2ee307d81409b0cff7eea71bd88653e65e77/char/pc/',
+    mbBase: 'https://cdn.jsdelivr.net/gh/jkjkjkjkjk72-ux/char-assets@235e2ee307d81409b0cff7eea71bd88653e65e77/char/mobile/',
+    still:  'https://cdn.jsdelivr.net/gh/jkjkjkjkjk72-ux/char-assets@235e2ee307d81409b0cff7eea71bd88653e65e77/char/still.webp',
     pcCount: 36, mbCount: 22,
     prefix: 'char_', pad: 4, ext: '.webp',
     mobileAt: 768,
-    loopSec: 3.2,   // 캐릭터 한 바퀴(초)
+    loopSec: 4.2,   // 캐릭터 한 바퀴(초). 시퀀스가 360도라 끊김 없이 이어진다
     wipeAt: 20,     // 이만큼(px) 내려가면 붓칠
     unwipeAt: 4,    // 이 위로 올라오면 붓칠을 걷는다
     startAt: 10
@@ -380,6 +377,7 @@
     liqE.setAttribute('d', dF);
   }
   function liquidTo(target) {
+    if (!target) root.classList.remove('qc-filled');
     liq.from = liq.p; liq.to = target; liq.t0 = performance.now();
     liq.dur = target ? 1000 : 700;
     cancelAnimationFrame(liq.raf);
@@ -388,7 +386,7 @@
       liq.p = liq.from + (liq.to - liq.from) * k;
       drawLiquid(liq.p, now);
       if (k < 1) liq.raf = requestAnimationFrame(step);
-      else if (liq.to === 1) { liqB.setAttribute('d', 'M-4,-10H104V110H-4Z'); liqF.setAttribute('d', 'M-4,-10H104V110H-4Z'); liqE.setAttribute('d', ''); }
+      else if (liq.to === 1) { root.classList.add('qc-filled'); liqB.setAttribute('d', 'M-4,-10H104V110H-4Z'); liqF.setAttribute('d', 'M-4,-10H104V110H-4Z'); liqE.setAttribute('d', ''); }
       else { liqB.setAttribute('d', ''); liqF.setAttribute('d', ''); liqE.setAttribute('d', ''); }
     })(liq.t0);
   }
@@ -430,14 +428,23 @@
     ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(f, 0, 0);
   }
 
-  // 캐릭터 루프: 시간 기반. 덮인 뒤에는 그리지 않는다.
+  // 캐릭터 루프: 시간 기반. 시퀀스는 한 바퀴 360도라 마지막 장 다음이 첫 장이다.
+  // 장과 장 사이는 두 장을 비율대로 겹쳐 그려(크로스페이드) 초당 11장이 뚝뚝 넘어가지 않게 한다.
+  // 덮인 뒤에는 그리지 않는다.
   var t0 = 0;
   function tick(now) {
     requestAnimationFrame(tick);
     if (!ready || wiped) return;
     if (!t0) t0 = now;
-    var n = frames.length, idx = Math.floor(((now - t0) / 1000 / CFG.loopSec) * n) % n;
-    if (idx !== cur) { cur = idx; draw(idx); }
+    var n = frames.length, pos = ((now - t0) / 1000 / CFG.loopSec) * n;
+    var i = Math.floor(pos) % n, j = (i + 1) % n, k = pos - Math.floor(pos);
+    var a = frames[i], b = frames[j];
+    cur = i;
+    if (!a) return;
+    if (!sized) { cv.width = fw(a); cv.height = fh(a); sized = true; }
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.globalAlpha = 1; ctx.drawImage(a, 0, 0);
+    if (b && k > 0.02) { ctx.globalAlpha = k; ctx.drawImage(b, 0, 0); ctx.globalAlpha = 1; }
   }
   requestAnimationFrame(tick);
 
@@ -453,7 +460,9 @@
   // 스크롤마다: 붓칠 판정, 내용 가속, 마크 위치, 원형 텍스트 회전. 전부 transform 만 바꾼다.
   function frame() {
     var H = window.innerHeight - headerH;
-    var y = headerH - scene.getBoundingClientRect().top;   // 장면 기준 스크롤량
+    // 장면 기준 스크롤량. 장면이 헤더 아래에서 시작하면 그 지점부터, 헤더에 겹쳐 시작하면 페이지 맨 위부터 센다.
+    var st = scene.getBoundingClientRect().top + window.scrollY;
+    var y = window.scrollY - Math.max(0, st - headerH);
     if (!wiped && y > CFG.wipeAt) setWiped(true);
     else if (wiped && y < CFG.unwipeAt) setWiped(false);
     var yy = Math.max(0, y);

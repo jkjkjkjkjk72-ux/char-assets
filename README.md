@@ -62,10 +62,14 @@ blender -b -P blender/turntable.py -- \
   --silhouette true --still true --width 1000 --height 1000 --zoom 3.2
 ```
 
+루프가 끊기지 않으려면 `--angle` 을 360·(장 수-1)/장 수 로 준다(36장이면 350, 22장이면 343.6364).
+지금 임시 구는 `--pose ball` 로 렌더했다.
+
 `--model` 을 빼면 임시 구 도형으로 돈다. `--pose` 는 `ball` `stand` `sit`,
 `--camera move` 를 주면 오브젝트 대신 카메라가 움직인다.
 
-렌더 후 푸시하면 CDN 이 따라간다. 아임웹 코드는 건드릴 필요가 없다.
+렌더 후 푸시하고, `imweb-block.html` 의 캐릭터 주소 3곳에 있는 커밋 해시를 새 해시로 바꾼다.
+`@main` 은 jsDelivr 캐시가 최대 하루 늦어 옛 렌더가 섞이므로 해시로 고정한다.
 
 ```bash
 git add -A && git commit -m "캐릭터 교체" && git push
