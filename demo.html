@@ -243,7 +243,7 @@
   // fetch 라서 file:// 로는 안 열린다. node serve.js 로 열 것.
   var slot = document.getElementById('qc-slot');
   fetch('imweb-block.html').then(function (r) { return r.text(); }).then(function (html) {
-    html = html.replace(/https:\/\/cdn\.jsdelivr\.net\/gh\/jkjkjkjkjk72-ux\/char-assets@main\/char\//g, 'char/');
+    html = html.replace(/https:\/\/cdn\.jsdelivr\.net\/gh\/jkjkjkjkjk72-ux\/char-assets@[^\/]+\/char\//g, 'char/');
     if (/[?&]fast=1/.test(location.search)) html = html.replace(/lerp:\s*[\d.]+/, 'lerp: 1');
     var m = html.match(/<script>([\s\S]*?)<\/script>/);
     slot.innerHTML = html.replace(/<script>[\s\S]*?<\/script>/, '');
