@@ -639,7 +639,7 @@
      내려가면 초록이 다 덮이고 마크까지 올라온 상태로,
      올라가면 전환 전 화면으로. 중간에 걸쳐 멈추지 않게 한다. */
   var SNAP_END = 0.88, BAND = [0.02, 0.86];
-  var snapTimer = null, snapRAF = 0, snapping = false, lastY = scrollY, dir = 1, snapDir = 1;
+  var snapTimer = null, snapRAF = 0, snapping = false, snapTo = 0, lastY = scrollY, dir = 1, snapDir = 1;
 
   function band() {
     var span = green.offsetHeight - innerHeight;
@@ -655,7 +655,7 @@
   function tweenTo(y) {
     cancelAnimationFrame(snapRAF);
     var y0 = scrollY, dy = y - y0;
-    snapDir = dy > 0 ? 1 : -1;
+    snapTo = y; snapDir = dy > 0 ? 1 : -1;
     var dur = Math.min(1100, Math.max(480, Math.abs(dy) * 0.55));
     var t0 = performance.now();
     snapping = true;
@@ -687,11 +687,13 @@
     lastY = y;
   }, { passive: true });
 
-  // 반대 방향으로 밀면 스냅을 놓아준다.
-  // 같은 방향 입력이나 트랙패드 관성으로는 풀리지 않게 한다.
+  // 스냅 도중 입력이 오면 무시하지 않는다.
+  // 반대 방향이면 스냅을 놓아주고, 같은 방향이면 목표 지점까지 바로 보낸다.
   addEventListener('wheel', function (e) {
-    if (!snapping) return;
-    if ((snapDir > 0 && e.deltaY < -6) || (snapDir < 0 && e.deltaY > 6)) snapping = false;
+    if (!snapping || Math.abs(e.deltaY) <= 6) return;
+    snapping = false;
+    cancelAnimationFrame(snapRAF);
+    if ((snapDir > 0) === (e.deltaY > 0)) { scrollTo(0, snapTo); lastY = snapTo; }
   }, { passive: true });
   ['touchstart', 'keydown'].forEach(function (ev) {
     addEventListener(ev, function () { snapping = false; }, { passive: true });

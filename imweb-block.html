@@ -222,7 +222,8 @@
     prefix: 'char_', pad: 4, ext: '.webp',
     mobileAt: 768,
     lerp: 0.1,      // 값에 주는 관성. 낮을수록 묵직하다
-    waveHz: 30      // 파형 갱신 빈도. 낮출수록 가볍다
+    waveHz: 30,     // 파형 갱신 빈도. 낮출수록 가볍다
+    startAt: 10     // 앞쪽 이만큼 받으면 먼저 시작. 나머지는 뒤에서 채운다
   };
   /* ═════════════════════════ */
 
@@ -287,12 +288,17 @@
   }
 
   function preload() {
-    var count = isMobile ? CFG.mbCount : CFG.pcCount, done = 0;
-    frames = [];
-    function step() {
+    var count = isMobile ? CFG.mbCount : CFG.pcCount, done = 0, head = 0;
+    var startAt = Math.min(CFG.startAt, count);
+    frames = new Array(count);   // 길이를 미리 고정해야 스크럽 비율이 흔들리지 않는다
+    function step(i) {
       done++;
-      if (bar) bar.style.width = (done / count * 100) + '%';
-      if (done === count) start();
+      // 0번부터 빈틈없이 이어진 구간만 센다. 그만큼 오면 다 기다리지 않고 시작한다.
+      while (head < count && frames[head] !== undefined) head++;
+      if (bar) bar.style.width = (Math.min(done, startAt) / startAt * 100) + '%';
+      if (!ready && (head >= startAt || done === count)) start();
+      // 이미 시작한 뒤 늦게 온 장이 지금 보고 있는 장이면 바로 그린다
+      else if (ready && i === cur) draw(i);
     }
     for (var i = 0; i < count; i++) (function (i) {
       var img = new Image();
@@ -301,12 +307,12 @@
         // ImageBitmap 은 미리 디코딩된 형태라 그릴 때가 훨씬 싸다
         if (window.createImageBitmap) {
           createImageBitmap(img).then(
-            function (bm) { frames[i] = bm; step(); },
-            function () { frames[i] = img; step(); }
+            function (bm) { frames[i] = bm; step(i); },
+            function () { frames[i] = img; step(i); }
           );
-        } else { frames[i] = img; step(); }
+        } else { frames[i] = img; step(i); }
       };
-      img.onerror = function () { frames[i] = null; step(); };
+      img.onerror = function () { frames[i] = null; step(i); };
       img.src = url(i);
     })(i);
   }
@@ -461,7 +467,7 @@
      내려가면 초록이 다 덮이고 마크까지 올라온 상태로,
      올라가면 전환 전 화면으로. 중간에 걸쳐 멈추지 않게 한다. */
   var SNAP_END = 0.88, BAND = [0.02, 0.86];
-  var snapTimer = null, snapRAF = 0, snapping = false;
+  var snapTimer = null, snapRAF = 0, snapping = false, snapTo = 0;
   var lastY = window.scrollY, dir = 1, snapDir = 1;
 
   function band() {
@@ -477,7 +483,7 @@
   function tweenTo(y) {
     cancelAnimationFrame(snapRAF);
     var y0 = window.scrollY, dy = y - y0;
-    snapDir = dy > 0 ? 1 : -1;
+    snapTo = y; snapDir = dy > 0 ? 1 : -1;
     var dur = Math.min(1100, Math.max(480, Math.abs(dy) * 0.55));
     var t0 = performance.now();
     snapping = true;
@@ -509,11 +515,14 @@
     lastY = y;
   }, { passive: true });
 
-  // 반대 방향으로 밀면 스냅을 놓아준다.
-  // 같은 방향 입력이나 트랙패드 관성으로는 풀리지 않게 한다.
+  // 스냅 도중 입력이 오면 무시하지 않는다.
+  // 반대 방향이면 스냅을 놓아주고, 같은 방향이면 목표 지점까지 바로 보내
+  // 이어지는 스크롤이 거기서부터 먹게 한다. 휠이 씹히는 느낌을 없애는 부분.
   window.addEventListener('wheel', function (e) {
-    if (!snapping) return;
-    if ((snapDir > 0 && e.deltaY < -6) || (snapDir < 0 && e.deltaY > 6)) snapping = false;
+    if (!snapping || Math.abs(e.deltaY) <= 6) return;
+    snapping = false;
+    cancelAnimationFrame(snapRAF);
+    if ((snapDir > 0) === (e.deltaY > 0)) { window.scrollTo(0, snapTo); lastY = snapTo; }
   }, { passive: true });
   ['touchstart', 'keydown'].forEach(function (ev) {
     window.addEventListener(ev, function () { snapping = false; }, { passive: true });
