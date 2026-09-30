@@ -187,16 +187,17 @@
 /* ── 녹색 위 내용: 스크롤 초반 260px 동안 162px 더 올라간다(실측) ── */
 /* 헤드라인이 첫 초록 화면 아래쪽(68%)에 보이도록 고정 화면 위로 당겨 올린다 */
 .qc-content { position: relative; z-index: 5; padding: 0 40px 0; margin-top: calc(var(--qc-h) * -.32); margin-bottom: -162px; color: #000; will-change: transform; }
-.qc-head, .qc-services { opacity: 0; transform: translateY(70px); transition: opacity .25s ease, transform .3s ease; }
+.qc-head, .qc-svc { opacity: 0; transform: translateY(70px); transition: opacity .25s ease, transform .3s ease; }
 .qc-filled .qc-head { opacity: 1; transform: none; transition: opacity .6s ease .05s, transform 1s cubic-bezier(.16,1,.3,1) .05s; }
-.qc-filled .qc-services { opacity: 1; transform: none; transition: opacity .6s ease .25s, transform 1s cubic-bezier(.16,1,.3,1) .25s; }
+.qc-filled .qc-svc.qc-in { opacity: 1; transform: none; transition: opacity .6s ease, transform 1s cubic-bezier(.16,1,.3,1); }
 .qc-graf2 { position: absolute; left: 0; top: 86px; width: 100%; height: auto; z-index: -1; pointer-events: none; }
 .qc-graf2 { opacity: 0; transition: opacity .4s ease; }
 .qc-wiped .qc-graf2 { opacity: 1; transition-delay: .6s; }
 /* 아임웹 기본 h2 스타일이 덮어쓰므로 !important 로 고정한다 */
 .qc-root .qc-content h2.qc-head { text-align: center; text-transform: uppercase; font-family: inherit !important; font-size: 5.7vw !important; font-weight: 800 !important; line-height: 1.02 !important; letter-spacing: -.035em !important; color: #000 !important; margin: 0 !important; }
 .qc-root .qc-svc h3 { font-family: inherit !important; font-weight: 800 !important; color: #000 !important; }
-.qc-services { margin-top: 212px; }
+/* 첫 초록 화면에는 헤드라인만. 서비스는 한 번 더 스크롤해야 올라온다 */
+.qc-services { margin-top: max(212px, calc(var(--qc-h) * .45)); }
 .qc-svc { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; padding-bottom: 50px; margin-bottom: 50px; border-bottom: 1px solid #000; }
 .qc-svc:last-child { margin-bottom: 0; }
 .qc-svc h3 { max-width: 40vw; text-transform: uppercase; font-size: 4.5vw; font-weight: 800; line-height: 1.02; letter-spacing: -.035em; }
@@ -212,7 +213,7 @@
   .qc-root .qc-content h2.qc-head { font-size: 9vw !important; }
   .qc-svc { flex-direction: column; gap: 14px; padding-bottom: 30px; margin-bottom: 30px; }
   .qc-svc h3 { font-size: 9vw; max-width: none; }
-  .qc-services { margin-top: 120px; }
+  .qc-services { margin-top: calc(var(--qc-h) * .45); }
   .qc-bar1, .qc-bar2 { left: 8px; right: 8px; }
   .qc-reel { display: none; }
   .qc-bar1 { font-size: 13px; padding: 0 14px; }
@@ -222,7 +223,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .qc-cspin { animation: none; }
-  .qc-mrise, .qc-head, .qc-services { transition: none !important; }
+  .qc-mrise, .qc-head, .qc-svc { transition: none !important; }
   .qc-orbit-spin, .qc-track { animation: none; }
   .qc-float { transition: none !important; }
   .qc-m3d { animation: none; transform: rotateY(-18deg); }
@@ -494,7 +495,15 @@
 
   if (window.IntersectionObserver) {
     new IntersectionObserver(function (es) { arch.classList.toggle('qc-inview', es[0].isIntersecting); }).observe(arch);
-  } else arch.classList.add('qc-inview');
+    // 서비스 줄: 화면 아래 15% 선을 넘으면 올라온다. 위로 되돌아가 화면 밖으로 나가면 다시 숨겨 둔다.
+    var svcIO = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { e.target.classList.toggle('qc-in', e.isIntersecting); });
+    }, { rootMargin: '0px 0px -15% 0px' });
+    [].forEach.call(root.querySelectorAll('.qc-svc'), function (el) { svcIO.observe(el); });
+  } else {
+    arch.classList.add('qc-inview');
+    [].forEach.call(root.querySelectorAll('.qc-svc'), function (el) { el.classList.add('qc-in'); });
+  }
 
   preload();
   frame();
