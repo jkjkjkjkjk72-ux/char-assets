@@ -1,0 +1,524 @@
+<!-- ═══════════════════════════════════════════════════════════
+     아임웹 첫 섹션 코드 블록에 통째로 붙여넣기
+     히어로(캐릭터 스크럽) + 색 전환(패널 상승) 한 덩어리
+
+     고칠 곳 — 아래 CSS 상단의 색 3개, 그리고 본문 문구뿐입니다.
+     ═══════════════════════════════════════════════════════════ -->
+
+<div class="qc-root">
+
+  <div class="qc-hero">
+    <div class="qc-stick">
+      <div class="qc-glow"></div>
+      <div class="qc-float"><canvas class="qc-canvas"></canvas></div>
+      <img class="qc-still" alt="">
+      <div class="qc-scrim"></div>
+      <div class="qc-copy">
+        <h2>
+          <span class="qc-mask"><span>여기에 헤드라인</span></span>
+          <span class="qc-mask"><span>두 줄까지</span></span>
+        </h2>
+        <div class="qc-sub qc-mask"><span>서브카피 한 줄이 들어갑니다</span></div>
+      </div>
+      <div class="qc-hint"><span>SCROLL</span><b></b></div>
+      <div class="qc-load"><span></span></div>
+    </div>
+  </div>
+
+  <div class="qc-green">
+    <div class="qc-stick">
+      <div class="qc-gbg">
+        <div class="qc-gglow"></div>
+        <img class="qc-gchar" alt="">
+      </div>
+      <div class="qc-pback">
+        <svg class="qc-wave" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path class="qc-f"/></svg>
+      </div>
+      <div class="qc-pfront">
+        <svg class="qc-wave" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path class="qc-f"/><path class="qc-e"/></svg>
+        <div class="qc-sheen"></div>
+        <div class="qc-grain"></div>
+        <div class="qc-pinner">
+          <div class="qc-markwrap"><img class="qc-mark" alt=""></div>
+          <div class="qc-gtext"><h2>전환 화면 문구</h2></div>
+        </div>
+        <i class="qc-sat qc-s1"></i><i class="qc-sat qc-s2"></i><i class="qc-sat qc-s3"></i>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.qc-root {
+  /* ══════ 색 — 브랜드 색으로 교체 ══════ */
+  --qc-ink:    #14101C;
+  --qc-glow:   #3D1FD6;
+  --qc-accent: #B6F23D;
+  /* ════════════════════════════════════ */
+  --qc-e: cubic-bezier(.16,1,.3,1);
+  /* 아임웹 컨테이너 폭에 갇히지 않고 화면을 꽉 채운다.
+     --qc-vw 는 스크립트가 스크롤바를 뺀 실제 폭으로 채워준다. */
+  width: var(--qc-vw, 100vw);
+  margin-left: calc(50% - var(--qc-vw, 100vw) / 2);
+  position: relative;
+  background: var(--qc-ink);
+  color: #fff;
+  letter-spacing: -.012em;
+  line-height: 1.45;
+}
+.qc-root * { box-sizing: border-box; }
+/* 행간이 좁을수록 글자가 밀착해 긴장이 생긴다.
+   영문은 0.97까지 조이지만 한글은 받침이 잘려 1.02가 하한이다. */
+.qc-root h2 { margin: 0; font-weight: 800; letter-spacing: -.035em; line-height: 1.02; }
+
+.qc-hero  { position: relative; height: 280vh; }
+.qc-green { position: relative; height: 300vh; }
+.qc-stick { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+
+/* ── 히어로 ── */
+.qc-glow {
+  position: absolute; inset: -10%;
+  background: radial-gradient(closest-side, var(--qc-glow) 0%, rgba(61,31,214,0) 70%);
+  opacity: 0; transition: opacity 1.6s var(--qc-e);
+}
+.qc-root.qc-ready .qc-glow { opacity: .8; }
+.qc-float { position: absolute; inset: 0; will-change: transform; }
+/* 캔버스를 원본 크기로 두고 화면 맞춤은 CSS에 맡긴다.
+   이러면 그릴 때 확대 계산이 사라져 1:1 복사가 된다. */
+.qc-canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+  object-fit: contain; object-position: 50% 38%;
+  opacity: 0; transform: scale(1.1);
+  transition: opacity 1.4s var(--qc-e) .1s, transform 1.8s var(--qc-e) .1s;
+}
+.qc-root.qc-ready .qc-canvas { opacity: 1; transform: none; }
+.qc-still {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain; object-position: 50% 38%; padding: 8vh 8vw;
+  transition: opacity .6s ease;
+}
+.qc-still.qc-gone { opacity: 0; }
+
+/* 글자가 캐릭터 위에 얹혀도 읽히도록 아래를 눌러준다 */
+.qc-scrim {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 62%;
+  background: linear-gradient(180deg, rgba(20,16,28,0) 0%, rgba(20,16,28,.72) 58%, rgba(20,16,28,.94) 100%);
+  pointer-events: none;
+}
+.qc-copy { position: absolute; left: 0; right: 0; bottom: 13%; text-align: center; padding: 0 28px; }
+.qc-copy h2 { font-size: clamp(38px, 7vw, 100px); color: #fff; }
+.qc-sub { margin-top: 22px; opacity: .68; font-size: clamp(15px, 1.8vw, 21px); line-height: 1.38; letter-spacing: -.01em; }
+
+.qc-mask { overflow: hidden; display: block; }
+.qc-mask > * { display: block; transform: translateY(110%); transition: transform 1.15s var(--qc-e); }
+.qc-mask.qc-in > * { transform: none; }
+.qc-mask:nth-child(2) > * { transition-delay: .07s; }
+
+.qc-hint {
+  position: absolute; left: 50%; bottom: 36px; transform: translateX(-50%);
+  font-family: ui-monospace, Consolas, monospace; font-size: 11px; letter-spacing: .22em;
+  display: flex; flex-direction: column; align-items: center; gap: 10px; opacity: .45;
+}
+.qc-hint b { display: block; width: 1px; height: 34px;
+  background: linear-gradient(rgba(255,255,255,.7), transparent);
+  animation: qc-drop 2.2s var(--qc-e) infinite; }
+@keyframes qc-drop {
+  0%   { transform: scaleY(0); transform-origin: top; }
+  45%  { transform: scaleY(1); transform-origin: top; }
+  46%  { transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+.qc-load {
+  position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  width: 140px; height: 2px; background: rgba(255,255,255,.2);
+  transition: opacity .5s ease;
+}
+.qc-load span { display: block; height: 100%; width: 0; background: var(--qc-accent); transition: width .18s linear; }
+.qc-load.qc-gone { opacity: 0; }
+
+/* ── 색 전환 ── */
+.qc-gbg { position: absolute; inset: 0; }
+.qc-gglow {
+  position: absolute; inset: -10%;
+  background: radial-gradient(closest-side, var(--qc-glow) 0%, rgba(61,31,214,0) 68%);
+  opacity: .45;
+}
+.qc-gchar {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain; object-position: 50% 38%; padding: 12vh 12vw;
+}
+
+.qc-pback {
+  position: absolute; left: -4%; width: 108%; top: 0; height: 140vh;
+  background: color-mix(in srgb, var(--qc-accent) 82%, var(--qc-ink));
+  transform: translateY(120%); will-change: transform;
+}
+.qc-pfront {
+  position: absolute; left: -4%; width: 108%; top: 0; height: 140vh;
+  background: var(--qc-accent);
+  transform: translateY(120%); will-change: transform;
+}
+/* 선단을 고정된 타원이 아니라 매 프레임 계산하는 파형으로 그린다.
+   두 개의 사인파가 서로 다른 속도로 흐르면서 액체 표면처럼 일렁인다. */
+.qc-wave {
+  position: absolute; left: 0; bottom: 100%;
+  width: 100%; height: 26vh; display: block; overflow: visible;
+}
+.qc-pback  .qc-wave path.qc-f { fill: color-mix(in srgb, var(--qc-accent) 82%, var(--qc-ink)); }
+.qc-pfront .qc-wave path.qc-f { fill: var(--qc-accent); }
+.qc-wave path.qc-e {
+  fill: none; stroke: rgba(255,255,255,.62); stroke-width: 3;
+  vector-effect: non-scaling-stroke; stroke-linecap: round;
+}
+.qc-sheen {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(130% 72% at 50% 4%, rgba(255,255,255,.4), rgba(255,255,255,0) 60%);
+}
+/* 평평한 단색은 싸 보이고 압축에도 약하다. 아주 옅은 결을 얹는다.
+   blend mode 는 전체 화면에서 무거워 쓰지 않는다. */
+.qc-grain {
+  position: absolute; inset: 0; opacity: .05; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* will-change 는 패널에만 남긴다. 많이 붙이면 레이어가 늘어 오히려 느려진다. */
+.qc-pinner {
+  position: absolute; left: 0; right: 0; top: 0; height: 100vh;
+  display: grid; place-items: center; align-content: center; gap: 5vh;
+}
+.qc-markwrap { overflow: hidden; line-height: 0; }
+.qc-mark { width: 22vmin; display: block; transform: translateY(105%); }
+.qc-gtext { overflow: hidden; padding: 0 28px; }
+.qc-gtext h2 {
+  font-size: clamp(26px, 4.2vw, 58px); color: var(--qc-ink); text-align: center;
+  transform: translateY(110%);
+}
+.qc-sat { position: absolute; border-radius: 50%; background: var(--qc-ink); opacity: 0; }
+.qc-s1 { width: 2.4vmin; height: 2.4vmin; left: 22%; top: 30%; }
+.qc-s2 { width: 1.5vmin; height: 1.5vmin; right: 25%; top: 60%; }
+.qc-s3 { width: 1vmin;   height: 1vmin;   left: 36%; top: 76%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qc-hero, .qc-green { height: 100vh; }
+  .qc-hint b { animation: none; }
+  .qc-mask > * { transform: none !important; }
+  .qc-pback, .qc-pfront, .qc-pinner, .qc-mark, .qc-gtext h2 { transform: none !important; }
+  .qc-sat { opacity: .5 !important; }
+  .qc-canvas { opacity: 1 !important; transform: none !important; }
+}
+</style>
+
+<script>
+(function () {
+  /* ══════════ 설정 ══════════ */
+  var CFG = {
+    pcBase: 'https://cdn.jsdelivr.net/gh/jkjkjkjkjk72-ux/char-assets@main/char/pc/',
+    mbBase: 'https://cdn.jsdelivr.net/gh/jkjkjkjkjk72-ux/char-assets@main/char/mobile/',
+    mark:   'https://cdn.jsdelivr.net/gh/jkjkjkjkjk72-ux/char-assets@main/char/silhouette.webp',
+    still:  'https://cdn.jsdelivr.net/gh/jkjkjkjkjk72-ux/char-assets@main/char/still.webp',
+
+    pcCount: 36, mbCount: 22,
+    prefix: 'char_', pad: 4, ext: '.webp',
+    mobileAt: 768,
+    lerp: 0.1,      // 값에 주는 관성. 낮을수록 묵직하다
+    waveHz: 30      // 파형 갱신 빈도. 낮출수록 가볍다
+  };
+  /* ═════════════════════════ */
+
+  var root = document.querySelector('.qc-root');
+  if (!root || root.dataset.qcInit) return;
+  root.dataset.qcInit = '1';
+
+  // 스크롤바를 뺀 실제 폭. 100vw 를 그대로 쓰면 가로 스크롤이 생긴다.
+  function setVW() {
+    root.style.setProperty('--qc-vw', document.documentElement.clientWidth + 'px');
+  }
+  setVW();
+
+  // 조상 중 하나라도 overflow 를 자르면 sticky 가 죽는다. 그 부분만 풀어준다.
+  (function () {
+    var el = root.parentElement;
+    while (el && el !== document.documentElement) {
+      if (getComputedStyle(el).overflow !== 'visible') el.style.overflow = 'visible';
+      el = el.parentElement;
+    }
+  })();
+
+  var q = function (s) { return root.querySelector(s); };
+  var hero = q('.qc-hero'), green = q('.qc-green'),
+      cv = q('.qc-canvas'), ctx = cv.getContext('2d', { alpha: true }),
+      float_ = q('.qc-float'), glow = q('.qc-glow'),
+      still = q('.qc-still'), copy = q('.qc-copy'), hint = q('.qc-hint'),
+      load = q('.qc-load'), bar = q('.qc-load span'),
+      pback = q('.qc-pback'), pfront = q('.qc-pfront'),
+      pathB = q('.qc-pback .qc-wave path.qc-f'),
+      pathF = q('.qc-pfront .qc-wave path.qc-f'),
+      edgeF = q('.qc-pfront .qc-wave path.qc-e'),
+      gbg = q('.qc-gbg'), gchar = q('.qc-gchar'), gglow = q('.qc-gglow'),
+      pinner = q('.qc-pinner'), mark = q('.qc-mark'), gh2 = q('.qc-gtext h2'),
+      sats = [].slice.call(root.querySelectorAll('.qc-sat'));
+
+  var frames = [], ready = false, cur = -1, sized = false, lastWave = 0;
+  var isMobile = window.innerWidth < CFG.mobileAt;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 목표값과 현재값을 분리해 관성을 만든다. 스크롤 자체는 건드리지 않는다.
+  var S = { hero: 0, green: 0 }, T = { hero: 0, green: 0 }, idle = 0;
+
+  still.src = CFG.still;
+  gchar.src = CFG.still;
+  mark.src  = CFG.mark;
+
+  // 같은 값을 다시 쓰지 않는다. 문자열 만드는 비용이 매 프레임 쌓인다.
+  function set(el, prop, val) {
+    var c = el.__qc || (el.__qc = {});
+    if (c[prop] === val) return;
+    c[prop] = val;
+    el.style[prop] = val;
+  }
+  function fw(f) { return f ? (f.width || f.naturalWidth) : 0; }
+  function fh(f) { return f ? (f.height || f.naturalHeight) : 0; }
+
+  function url(i) {
+    var n = String(i + 1);
+    while (n.length < CFG.pad) n = '0' + n;
+    return (isMobile ? CFG.mbBase : CFG.pcBase) + CFG.prefix + n + CFG.ext;
+  }
+
+  function preload() {
+    var count = isMobile ? CFG.mbCount : CFG.pcCount, done = 0;
+    frames = [];
+    function step() {
+      done++;
+      if (bar) bar.style.width = (done / count * 100) + '%';
+      if (done === count) start();
+    }
+    for (var i = 0; i < count; i++) (function (i) {
+      var img = new Image();
+      img.decoding = 'async';
+      img.onload = function () {
+        // ImageBitmap 은 미리 디코딩된 형태라 그릴 때가 훨씬 싸다
+        if (window.createImageBitmap) {
+          createImageBitmap(img).then(
+            function (bm) { frames[i] = bm; step(); },
+            function () { frames[i] = img; step(); }
+          );
+        } else { frames[i] = img; step(); }
+      };
+      img.onerror = function () { frames[i] = null; step(); };
+      img.src = url(i);
+    })(i);
+  }
+
+  function start() {
+    ready = true;
+    setTimeout(function () {
+      root.classList.add('qc-ready');
+      load.classList.add('qc-gone');
+      still.classList.add('qc-gone');
+      setTimeout(function () {
+        var ms = copy.querySelectorAll('.qc-mask');
+        for (var i = 0; i < ms.length; i++) ms[i].classList.add('qc-in');
+      }, 320);
+    }, 220);
+  }
+
+  function seg(p, a, b) { return Math.min(1, Math.max(0, (p - a) / (b - a))); }
+  function ease(t)  { return 1 - Math.pow(1 - t, 4); }   // 강한 감속 — 등장용
+  function ease2(t) { return 1 - Math.pow(1 - t, 2); }   // 약한 감속 — 스크럽용
+
+  // 서로 다른 속도로 흐르는 사인파 두 개를 겹쳐 액체 표면을 만든다.
+  function wavePath(amp, f1, f2, ph) {
+    var N = 20, pts = [], i, x, y;
+    for (i = 0; i <= N; i++) {
+      x = i / N * 100;
+      y = 62
+        - amp * Math.sin(x / 100 * Math.PI * f1 + ph)
+        - amp * 0.42 * Math.sin(x / 100 * Math.PI * f2 - ph * 1.6);
+      pts.push([x, y]);
+    }
+    var d = 'M0,' + pts[0][1].toFixed(1);
+    for (i = 1; i < N; i++) {
+      d += 'Q' + pts[i][0].toFixed(1) + ',' + pts[i][1].toFixed(1) +
+           ' ' + ((pts[i][0] + pts[i + 1][0]) / 2).toFixed(1) + ',' +
+           ((pts[i][1] + pts[i + 1][1]) / 2).toFixed(1);
+    }
+    return d + 'L100,' + pts[N][1].toFixed(1);
+  }
+
+  function prog(el) {
+    var span = el.offsetHeight - window.innerHeight;
+    if (span <= 0) return 0;
+    var p = -el.getBoundingClientRect().top / span;
+    return p < 0 ? 0 : (p > 1 ? 1 : p);
+  }
+
+  // 확대 없이 1:1 로 복사한다. 화면 맞춤은 CSS object-fit 이 한다.
+  function draw(i) {
+    var f = frames[i];
+    if (!f) return;
+    if (!sized) {
+      cv.width = fw(f); cv.height = fh(f);
+      sized = true;
+    }
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.drawImage(f, 0, 0);
+  }
+
+  function apply(now) {
+    var hp = S.hero, gp = S.green;
+
+    var idx = Math.round(hp * (frames.length - 1));
+    if (idx !== cur) { cur = idx; draw(idx); }
+
+    set(glow, 'transform', 'translateY(' + (hp * -34).toFixed(1) + 'px) scale(' + (1 + hp * 0.14).toFixed(3) + ')');
+    var bob = reduce ? 0 : Math.sin(now / 2600) * 9;
+    set(float_, 'transform', 'translateY(' + (bob + hp * 26).toFixed(1) + 'px)');
+
+    var f = seg(hp, 0.55, 0.92);
+    set(copy, 'opacity', (1 - f).toFixed(2));
+    set(copy, 'transform', 'translateY(' + (-f * 46).toFixed(0) + 'px)');
+    set(hint, 'opacity', (0.45 - seg(hp, 0, 0.12) * 0.45).toFixed(2));
+
+    // 두 겹이 어긋나며 올라온다
+    var riseB = ease2(seg(gp, 0.07, 0.56));
+    var riseF = ease2(seg(gp, 0.10, 0.60));
+    set(pback,  'transform', 'translateY(' + (120 - riseB * 120).toFixed(2) + '%)');
+    set(pfront, 'transform', 'translateY(' + (120 - riseF * 120).toFixed(2) + '%)');
+
+    // 파형은 30fps 로 충분하다. 다 덮인 뒤에는 화면 밖이라 아예 건너뛴다.
+    if (riseF < 0.995 && now - lastWave > 1000 / CFG.waveHz) {
+      lastWave = now;
+      var t = now / 1000;
+      var dB = wavePath((1 - riseB) * 48 + 3, 1.0, 2.3, t * 0.52);
+      var dF = wavePath((1 - riseF) * 54 + 3, 1.0, 2.7, t * 0.74 + 1.4);
+      pathB.setAttribute('d', dB + 'L100,100L0,100Z');
+      pathF.setAttribute('d', dF + 'L100,100L0,100Z');
+      edgeF.setAttribute('d', dF);
+    }
+
+    // 덮이는 쪽은 눌리며 물러난다
+    var press = seg(gp, 0.08, 0.58);
+    set(gbg, 'opacity', (1 - press * 0.8).toFixed(2));
+    set(gchar, 'transform', 'scale(' + (1 - press * 0.09).toFixed(3) + ') translateY(' + (press * -22).toFixed(0) + 'px)');
+    set(gglow, 'opacity', (0.45 - press * 0.3).toFixed(2));
+
+    var mUp = ease(seg(gp, 0.56, 0.76));
+    set(mark, 'transform', 'translateY(' + ((1 - mUp) * 105).toFixed(1) + '%)');
+    var tUp = ease(seg(gp, 0.66, 0.86));
+    set(gh2, 'transform', 'translateY(' + ((1 - tUp) * 110).toFixed(1) + '%)');
+
+    // 다 덮인 뒤에도 내용이 천천히 흐른다 — 멈춰 있지 않게
+    var drift = seg(gp, 0.70, 1);
+    set(pinner, 'transform', 'translateY(' + (-drift * 34).toFixed(1) + 'px)');
+    var wob = Math.sin(drift * Math.PI * 1.5);
+    for (var i = 0; i < sats.length; i++) {
+      var k = 1 + i * 0.5;
+      set(sats[i], 'opacity', (mUp * (0.85 - i * 0.16)).toFixed(2));
+      set(sats[i], 'transform', 'translate(' + (wob * 30 * k).toFixed(1) + 'px,' +
+        (-drift * (64 + i * 36) + wob * 14).toFixed(1) + 'px)');
+    }
+  }
+
+  function tick(now) {
+    requestAnimationFrame(tick);
+    if (!ready) return;
+
+    T.hero  = prog(hero);
+    T.green = prog(green);
+
+    var k = reduce ? 1 : CFG.lerp, moved = 0;
+    for (var key in T) {
+      var d = T[key] - S[key];
+      if (Math.abs(d) > 0.0002) { S[key] += d * k; moved = 1; }
+      else S[key] = T[key];
+    }
+    if (moved) idle = 0; else idle++;
+    // 전환 도중에는 멈춰 있어도 계속 그린다 — 수면이 살아 있어야 액체로 읽힌다
+    var live = S.green > 0.001 && S.green < 0.96;
+    if (moved || live || idle < 120) apply(now);
+  }
+  requestAnimationFrame(tick);
+
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(function () {
+      setVW();
+      var m = window.innerWidth < CFG.mobileAt;
+      if (m !== isMobile) {
+        isMobile = m; ready = false; sized = false; cur = -1;
+        still.classList.remove('qc-gone');
+        load.classList.remove('qc-gone');
+        preload();
+      }
+      idle = 0;
+    }, 200);
+  });
+
+  /* ── 전환 구간 스냅 ──
+     내려가면 초록이 다 덮이고 마크까지 올라온 상태로,
+     올라가면 전환 전 화면으로. 중간에 걸쳐 멈추지 않게 한다. */
+  var SNAP_END = 0.88, BAND = [0.02, 0.86];
+  var snapTimer = null, snapRAF = 0, snapping = false;
+  var lastY = window.scrollY, dir = 1, snapDir = 1;
+
+  function band() {
+    var span = green.offsetHeight - window.innerHeight;
+    return span <= 0 ? null : {
+      start: green.offsetTop,
+      end:   green.offsetTop + span * SNAP_END,
+      lo:    green.offsetTop + span * BAND[0],
+      hi:    green.offsetTop + span * BAND[1]
+    };
+  }
+
+  function tweenTo(y) {
+    cancelAnimationFrame(snapRAF);
+    var y0 = window.scrollY, dy = y - y0;
+    snapDir = dy > 0 ? 1 : -1;
+    var dur = Math.min(1100, Math.max(480, Math.abs(dy) * 0.55));
+    var t0 = performance.now();
+    snapping = true;
+    (function step(now) {
+      if (!snapping) return;
+      var p = Math.min(1, (now - t0) / dur);
+      window.scrollTo(0, y0 + dy * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) snapRAF = requestAnimationFrame(step);
+      else { snapping = false; lastY = window.scrollY; }
+    })(performance.now());
+  }
+
+  function maybeSnap() {
+    if (reduce || snapping) return;
+    var b = band();
+    if (!b) return;
+    var y = window.scrollY;
+    if (y > b.lo && y < b.hi) tweenTo(dir > 0 ? b.end : b.start);
+  }
+
+  window.addEventListener('scroll', function () {
+    idle = 0;
+    var y = window.scrollY;
+    if (!snapping) {
+      if (y !== lastY) dir = y > lastY ? 1 : -1;
+      clearTimeout(snapTimer);
+      snapTimer = setTimeout(maybeSnap, 110);
+    }
+    lastY = y;
+  }, { passive: true });
+
+  // 반대 방향으로 밀면 스냅을 놓아준다.
+  // 같은 방향 입력이나 트랙패드 관성으로는 풀리지 않게 한다.
+  window.addEventListener('wheel', function (e) {
+    if (!snapping) return;
+    if ((snapDir > 0 && e.deltaY < -6) || (snapDir < 0 && e.deltaY > 6)) snapping = false;
+  }, { passive: true });
+  ['touchstart', 'keydown'].forEach(function (ev) {
+    window.addEventListener(ev, function () { snapping = false; }, { passive: true });
+  });
+
+  preload();
+})();
+</script>

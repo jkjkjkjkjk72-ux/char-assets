@@ -1,0 +1,263 @@
+<!doctype html>
+<!-- 렌더된 시퀀스를 로컬에서 검증하는 테스트 페이지. 아임웹 이식 전 단계 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>시퀀스 로컬 테스트</title>
+<style>
+  :root {
+    --deep:  #200F41;
+    --core:  #4800DA;
+    --green: #9BFF00;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--deep);
+    color: #fff;
+    font-family: -apple-system, 'Malgun Gothic', sans-serif;
+  }
+
+  /* ── 구간 1 · 히어로 ── */
+  #qc-hero   { position: relative; height: 240vh; width: 100%; }
+  #qc-sticky { position: sticky; top: 0; height: 100vh; width: 100%; overflow: hidden; }
+  #qc-glow {
+    position: absolute; inset: 0;
+    background: radial-gradient(closest-side, var(--core) 0%, rgba(72,0,218,0) 70%);
+    opacity: .8;
+  }
+  #qc-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  #qc-still  {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: contain; opacity: 1; transition: opacity .5s ease;
+  }
+  #qc-still.gone { opacity: 0; }
+
+  #qc-copy {
+    position: absolute; left: 0; right: 0; bottom: 11%;
+    text-align: center; font-weight: 800; letter-spacing: -.02em;
+    font-size: clamp(22px, 4vw, 46px); line-height: 1.22;
+  }
+  #qc-copy small { display: block; font-weight: 400; opacity: .7; font-size: .46em; margin-top: .6em; letter-spacing: 0; }
+
+  #qc-load {
+    position: absolute; left: 50%; bottom: 42px; transform: translateX(-50%);
+    width: 140px; height: 2px; background: rgba(255,255,255,.25); transition: opacity .4s;
+  }
+  #qc-bar { display: block; height: 100%; width: 0%; background: #fff; transition: width .15s linear; }
+  #qc-load.gone { opacity: 0; }
+
+  /* ── 구간 2 · 초록 전환 ── */
+  #qc-green {
+    position: fixed; left: -5vw; width: 110vw; top: -8vh; height: 116vh;
+    background: var(--green); z-index: 5; pointer-events: none;
+    transform: translateY(110%);
+    display: flex; align-items: center; justify-content: center;
+    will-change: transform, border-radius;
+  }
+  #qc-mark {
+    width: 17vmin; aspect-ratio: 1; background: var(--deep);
+    border-radius: 50%; opacity: 0;
+  }
+
+  #spacer { height: 130vh; position: relative; z-index: 1; }
+
+  /* 계측 패널 */
+  #hud {
+    position: fixed; left: 14px; top: 14px; z-index: 50;
+    font: 12px/1.6 ui-monospace, Consolas, monospace;
+    background: rgba(0,0,0,.62); color: #9BFF00;
+    padding: 10px 13px; border-radius: 3px; white-space: pre;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #qc-green { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="hud">loading…</div>
+
+<div id="qc-hero">
+  <div id="qc-sticky">
+    <div id="qc-glow"></div>
+    <canvas id="qc-canvas"></canvas>
+    <img id="qc-still" alt="">
+    <div id="qc-copy">
+      여기에 헤드라인 한 줄
+      <small>서브카피 한 줄</small>
+    </div>
+    <div id="qc-load"><span id="qc-bar"></span></div>
+  </div>
+</div>
+
+<div id="qc-green"><div id="qc-mark"></div></div>
+
+<div id="spacer"></div>
+
+<script>
+(function () {
+  /* ══════ 설정 ══════ */
+  var CFG = {
+    pcBase:   'char/pc/',
+    mbBase:   'char/mobile/',
+    pcCount:  60,
+    mbCount:  30,
+    prefix:   'char_',
+    pad:      4,
+    ext:      '.webp',
+    still:    'char/still.webp',
+    mobileAt: 768
+  };
+  /* ═════════════════ */
+
+  var hero   = document.getElementById('qc-hero');
+  var canvas = document.getElementById('qc-canvas');
+  var still  = document.getElementById('qc-still');
+  var load   = document.getElementById('qc-load');
+  var bar    = document.getElementById('qc-bar');
+  var green  = document.getElementById('qc-green');
+  var mark   = document.getElementById('qc-mark');
+  var copy   = document.getElementById('qc-copy');
+  var glow   = document.getElementById('qc-glow');
+  var hud    = document.getElementById('hud');
+
+  var ctx = canvas.getContext('2d');
+  var frames = [], ready = false, cur = -1, queued = false;
+  var isMobile = window.innerWidth < CFG.mobileAt;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var t0 = performance.now(), loadMs = 0;
+
+  still.src = CFG.still;
+
+  function url(i) {
+    var n = String(i + 1);
+    while (n.length < CFG.pad) n = '0' + n;
+    return (isMobile ? CFG.mbBase : CFG.pcBase) + CFG.prefix + n + CFG.ext;
+  }
+
+  function preload() {
+    var count = isMobile ? CFG.mbCount : CFG.pcCount;
+    var done = 0, fail = 0;
+    frames = [];
+    for (var i = 0; i < count; i++) {
+      (function (i) {
+        var img = new Image();
+        img.decoding = 'async';
+        img.onload = function () { step(); };
+        img.onerror = function () { fail++; step(); };
+        function step() {
+          done++;
+          if (bar) bar.style.width = (done / count * 100) + '%';
+          if (done === count) { loadMs = Math.round(performance.now() - t0); start(fail); }
+        }
+        img.src = url(i);
+        frames[i] = img;
+      })(i);
+    }
+  }
+
+  function start(fail) {
+    ready = true;
+    load.classList.add('gone');
+    still.classList.add('gone');
+    resize();
+    if (fail) console.warn('로드 실패 ' + fail + '장');
+  }
+
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width  = canvas.clientWidth  * dpr;
+    canvas.height = canvas.clientHeight * dpr;
+    cur = -1;
+    render();
+  }
+
+  function heroProgress() {
+    var span = hero.offsetHeight - window.innerHeight;
+    if (span <= 0) return 0;
+    var p = -hero.getBoundingClientRect().top / span;
+    return p < 0 ? 0 : (p > 1 ? 1 : p);
+  }
+
+  function pageProgress() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    return max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+  }
+
+  function seg(p, a, b) { return Math.min(1, Math.max(0, (p - a) / (b - a))); }
+  function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+
+  function drawFrame(idx) {
+    var img = frames[idx];
+    if (!img || !img.naturalWidth) return;
+    var cw = canvas.width, ch = canvas.height;
+    var s = Math.min(cw / img.naturalWidth, ch / img.naturalHeight) * 0.92;
+    var w = img.naturalWidth * s, h = img.naturalHeight * s;
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
+  }
+
+  function render() {
+    if (!ready) return;
+
+    var hp = reduce ? 0 : heroProgress();
+    var idx = Math.round(hp * (frames.length - 1));
+    if (idx !== cur) { cur = idx; drawFrame(idx); }
+
+    glow.style.opacity = (0.8 - hp * 0.3).toFixed(2);
+    var fade = seg(hp, 0.72, 1);
+    copy.style.opacity = (1 - fade).toFixed(2);
+    copy.style.transform = 'translateY(' + (-fade * 26).toFixed(1) + 'px)';
+
+    /* 초록 전환 — 히어로가 끝난 뒤 시작 */
+    var pp = pageProgress();
+    var t2 = easeOut(seg(pp, 0.62, 0.82));
+    green.style.transform = 'translateY(' + (110 - t2 * 110).toFixed(2) + '%)';
+    var curve = (1 - t2) * 16;
+    green.style.borderRadius = '50% 50% 0 0 / ' + curve.toFixed(1) + '% ' + curve.toFixed(1) + '% 0 0';
+
+    var t3 = seg(pp, 0.80, 1);
+    mark.style.opacity = seg(pp, 0.80, 0.88).toFixed(2);
+    mark.style.borderRadius = (50 - t3 * 32).toFixed(1) + '%';
+    mark.style.transform =
+      'translateY(' + (-t3 * 14).toFixed(1) + '%) rotate(' + (t3 * 250).toFixed(1) + 'deg) ' +
+      'scale(' + (0.88 + Math.sin(t3 * Math.PI) * 0.2).toFixed(3) + ')';
+
+    hud.textContent =
+      'mode    ' + (isMobile ? 'MOBILE ' + CFG.mbCount : 'PC ' + CFG.pcCount) + '\n' +
+      'preload ' + loadMs + ' ms\n' +
+      'hero    ' + hp.toFixed(3) + '\n' +
+      'frame   ' + String(idx + 1).padStart(2, '0') + ' / ' + frames.length + '\n' +
+      'page    ' + pp.toFixed(3) + '\n' +
+      'green   ' + t2.toFixed(3);
+  }
+
+  function onScroll() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; render(); });
+  }
+
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(function () {
+      var nowMobile = window.innerWidth < CFG.mobileAt;
+      if (nowMobile !== isMobile) {
+        isMobile = nowMobile; ready = false;
+        still.classList.remove('gone'); load.classList.remove('gone');
+        t0 = performance.now(); preload();
+      } else { resize(); }
+    }, 200);
+  });
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  preload();
+})();
+</script>
+</body>
+</html>

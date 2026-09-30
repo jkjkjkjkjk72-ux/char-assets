@@ -1,0 +1,123 @@
+<!-- 아임웹 사이트 전체 스크립트에 붙여넣기 (트랜지션 코드 아래에) -->
+
+<div id="qw" class="qw-enter">
+  <div id="qw-mark">
+    <!-- 여기에 로고 SVG 또는 <img> 를 넣으세요. 안 쓸 거면 통째로 지워도 됩니다 -->
+    <svg viewBox="0 0 100 100" width="84" height="84" aria-hidden="true">
+      <circle cx="50" cy="50" r="34" fill="none" stroke="#fff" stroke-width="7"/>
+    </svg>
+  </div>
+</div>
+
+<style>
+  :root {
+    /* ══════════ 여기만 바꾸면 됩니다 ══════════ */
+    --qw-color:  #00C36A;   /* 패널 색 */
+    --qw-curve:  14%;       /* 곡선 깊이. 0% = 직선, 20% = 깊은 곡선 */
+    /* ═══════════════════════════════════════ */
+  }
+
+  #qw {
+    position: fixed;
+    left: -5vw;
+    width: 110vw;
+    top: -8vh;
+    height: 116vh;
+    background: var(--qw-color);
+    z-index: 99999;
+    pointer-events: none;
+    transform: translateY(-110%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform, border-radius;
+  }
+
+  #qw-mark {
+    opacity: 0;
+    transform: scale(.88);
+    will-change: opacity, transform;
+  }
+  #qw-mark svg, #qw-mark img { display: block; }
+
+  /* ── 페이지 진입 — 덮인 상태에서 위로 빠짐 ── */
+  #qw.qw-enter { animation: qw-enter .62s cubic-bezier(.16, 1, .3, 1) forwards; }
+  @keyframes qw-enter {
+    from { transform: translateY(0);     border-radius: 0; }
+    to   { transform: translateY(-110%); border-radius: 0 0 50% 50% / 0 0 var(--qw-curve) var(--qw-curve); }
+  }
+  #qw.qw-enter #qw-mark { animation: qw-mark-out .32s ease forwards; }
+  @keyframes qw-mark-out {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0; transform: scale(1.08); }
+  }
+
+  /* ── 페이지 이탈 — 아래에서 올라와 덮음 ── */
+  #qw.qw-leave { animation: qw-leave .5s cubic-bezier(.16, 1, .3, 1) forwards; }
+  @keyframes qw-leave {
+    from { transform: translateY(110%); border-radius: 50% 50% 0 0 / var(--qw-curve) var(--qw-curve) 0 0; }
+    to   { transform: translateY(0);    border-radius: 0; }
+  }
+  #qw.qw-leave #qw-mark { animation: qw-mark-in .42s .12s ease forwards; }
+  @keyframes qw-mark-in {
+    from { opacity: 0; transform: scale(.88); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #qw { display: none !important; }
+  }
+</style>
+
+<script>
+(function () {
+  var LEAVE_MS = 500;   // CSS의 qw-leave 시간(.5s)과 반드시 맞출 것
+  var panel = document.getElementById('qw');
+  if (!panel) return;
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  function reset() {
+    panel.className = '';
+    void panel.offsetWidth;
+    panel.classList.add('qw-enter');
+  }
+
+  /* ── 뒤로가기 복원 시 패널이 남지 않게 ── */
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) reset();
+  });
+
+  /* ── 안전장치: 덮인 채 멈추면 강제 해제 ── */
+  setTimeout(function () {
+    if (panel.classList.contains('qw-leave')) reset();
+  }, 4000);
+
+  /* ── 링크 클릭 가로채기 ── */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a') : null;
+    if (!a) return;
+
+    var href = a.getAttribute('href');
+    if (!href) return;
+
+    if (a.target === '_blank') return;
+    if (a.hasAttribute('download')) return;
+    if (href.charAt(0) === '#') return;
+    if (/^(mailto:|tel:|javascript:)/i.test(href)) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+
+    var url;
+    try { url = new URL(href, location.href); } catch (err) { return; }
+    if (url.origin !== location.origin) return;
+    if (url.href === location.href) return;
+
+    e.preventDefault();
+    panel.className = '';
+    void panel.offsetWidth;
+    panel.classList.add('qw-leave');
+
+    setTimeout(function () { location.href = url.href; }, LEAVE_MS);
+  }, true);
+})();
+</script>

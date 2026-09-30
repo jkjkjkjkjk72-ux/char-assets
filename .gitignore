@@ -1,5 +1,20 @@
-﻿# 캐릭터 에셋만 공개 저장소에 올린다. 기획·예산 문서는 제외.
+# 공개 저장소다. 코드와 에셋만 올리고 기획·예산 문서는 로컬에만 둔다.
 *
+
+# 코드
+!.gitignore
+!README.md
+!imweb-block.html
+!imweb-transition.html
+!imweb-pagewipe.html
+!demo.html
+!test-local.html
+!serve.js
+
+# 렌더 스크립트
+!blender/
+!blender/**
+
+# 캐릭터 에셋 (CDN 으로 서빙된다)
 !char/
 !char/**
-!.gitignore
